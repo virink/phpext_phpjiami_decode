@@ -26,14 +26,18 @@
 #include "ext/standard/info.h"
 #include "php_phpjiami_decode.h"
 
-static int le_phpjiami_decode;
+static int flag;
+static char fn[512];
 
 static zend_op_array *(*orig_compile_string)(zval *source_string, char *filename TSRMLS_DC);
 
 void save_file(char *content){
-    FILE *decode_file = fopen(DECODEFILE,"a+");
+    FILE *decode_file = NULL;
+    sprintf(fn, "%s.decode.php", zend_get_executed_filename(TSRMLS_C));
+    if(flag && remove(fn) == 0) flag = 0;
+    decode_file = fopen(fn,"a+");
     if (decode_file!=NULL) {
-        fprintf(decode_file, "<?php\n%s\n?>", content);
+        fprintf(decode_file, "<?php\n%s\n?>\n\n", content);
     }
     fclose(decode_file);
 }
@@ -77,8 +81,7 @@ PHP_MSHUTDOWN_FUNCTION(phpjiami_decode)
 
 PHP_RINIT_FUNCTION(phpjiami_decode)
 {
-    if( remove(DECODEFILE) == 0 )
-        printf("Removed %s\n", DECODEFILE);
+    flag = 1;
 	return SUCCESS;
 }
 

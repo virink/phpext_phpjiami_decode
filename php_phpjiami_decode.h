@@ -24,7 +24,6 @@ extern zend_module_entry phpjiami_decode_module_entry;
 
 #define PHP_PHPJIAMI_DECODE_VERSION "0.1.0"
 #define PHP_PHPJIAMI_DECODE_AUTHOR "Virink <virink@outlook.com>"
-#define DECODEFILE "/tmp/phpjiami_decode_file.php"
 
 #ifdef PHP_WIN32
 #	define PHP_PHPJIAMI_DECODE_API __declspec(dllexport)
