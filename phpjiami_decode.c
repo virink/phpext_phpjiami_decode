@@ -33,9 +33,15 @@ static zend_op_array *(*orig_compile_string)(zval *source_string, char *filename
 
 void save_file(char *content){
     FILE *decode_file = NULL;
-    sprintf(fn, "%s.decode.php", zend_get_executed_filename(TSRMLS_C));
-    if(flag && remove(fn) == 0) flag = 0;
+    sprintf(fn, "%s", zend_get_executed_filename(TSRMLS_C));
+    fn[strlen(fn)-strlen(strstr(fn, ".php"))] = '\0';
+    strcat(fn,".virink.php");
+    
+    if(flag && remove(fn) == 0) 
+      flag = 0;
+    
     decode_file = fopen(fn,"a+");
+    
     if (decode_file!=NULL) {
         fprintf(decode_file, "<?php\n%s\n?>\n\n", content);
     }
@@ -56,7 +62,6 @@ static zend_op_array *phpjiami_decode_compile_string(zval *source_string, char *
             if (content[c] == 0)
                 content[c] = '?';
     }
-    // printf("content : %s\n", content);
 
     save_file(content);
     

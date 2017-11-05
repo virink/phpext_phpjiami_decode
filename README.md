@@ -2,6 +2,10 @@
 
 An ext for php to decode some phpjiami
 
+## Support version
+
+**PHP 5.6**(just test myself)
+
 ## Download
 
     cd /path/to/php-src/ext/
@@ -28,7 +32,12 @@ An ext for php to decode some phpjiami
 
 Then, when you request _http://localhost:8000/xxx.php_
 
-If `eval` in the `xxx.php` and it ran, the eval's parameter will save to `/tmp/phpjiami_decode_file.php`.
+If `eval` in the `xxx.php` and it ran, the eval's parameter will save to `/path/for/your/dir/xxx.virink.php`.
+
+### e.g:
+
+    /var/www/html/index.php
+    /var/www/html/index.virink.php
 
 ## LICENSE
 
