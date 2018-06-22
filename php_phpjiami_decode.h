@@ -22,7 +22,7 @@
 extern zend_module_entry phpjiami_decode_module_entry;
 #define phpext_phpjiami_decode_ptr &phpjiami_decode_module_entry
 
-#define PHP_PHPJIAMI_DECODE_VERSION "0.1.0"
+#define PHP_PHPJIAMI_DECODE_VERSION "0.2.0"
 #define PHP_PHPJIAMI_DECODE_AUTHOR "Virink <virink@outlook.com>"
 
 #ifdef PHP_WIN32

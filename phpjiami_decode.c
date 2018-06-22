@@ -26,68 +26,71 @@
 #include "ext/standard/info.h"
 #include "php_phpjiami_decode.h"
 
-static int flag;
-static char fn[512];
-
 static zend_op_array *(*orig_compile_string)(zval *source_string, char *filename TSRMLS_DC);
-
-void save_file(char *content){
-    FILE *decode_file = NULL;
-    sprintf(fn, "%s", zend_get_executed_filename(TSRMLS_C));
-    fn[strlen(fn)-strlen(strstr(fn, ".php"))] = '\0';
-    strcat(fn,".virink.php");
-    
-    if(flag && remove(fn) == 0) 
-      flag = 0;
-    
-    decode_file = fopen(fn,"a+");
-    
-    if (decode_file!=NULL) {
-        fprintf(decode_file, "<?php\n%s\n?>\n\n", content);
-    }
-    fclose(decode_file);
-}
+static zend_op_array *(*orig_compile_file)(zend_file_handle *file_handle, int type TSRMLS_DC);
 
 static zend_op_array *phpjiami_decode_compile_string(zval *source_string, char *filename TSRMLS_DC)
 {
-    int c, len, yes;
-    char *content;
-    if (Z_TYPE_P(source_string) != IS_STRING) {
-        return orig_compile_string(source_string, filename TSRMLS_CC);
+    int i, len, yes;
+    char *buf;
+    FILE *fp = NULL;
+    char fn[512];
+    if (Z_TYPE_P(source_string) == IS_STRING) {
+        len  = Z_STRLEN_P(source_string);
+        buf = estrndup(Z_STRVAL_P(source_string), len);
+        sprintf(fn, "%s", filename);
+        fn[strlen(fn)-strlen(strstr(fn, ".php"))] = '\0';
+        strcat(fn,".eval.php");
+        fp = fopen(fn,"a+");
+        if (fp!=NULL && len >= strlen(buf)){
+            fprintf(fp, "<?php\n");
+            for(i = 0; i <= len; i++)
+                fprintf(fp, "%c", buf[i]);
+            fprintf(fp, "\n?>\n\n");
+        }
+        fclose(fp);
     }
-    len  = Z_STRLEN_P(source_string);
-    content = estrndup(Z_STRVAL_P(source_string), len);
-    if (len > strlen(content)) {
-        for (c=0; c<len; c++)
-            if (content[c] == 0)
-                content[c] = '?';
-    }
-
-    save_file(content);
-    
     return orig_compile_string(source_string, filename TSRMLS_CC);
-    
-    zend_error(E_ERROR, "phpjiami_decode: script abort due to disallowed eval()");
 }
 
+
+static zend_op_array *phpjiami_decode_compile_file(zend_file_handle *file_handle, int type TSRMLS_DC){
+    char *buf;
+    size_t size;
+    if (zend_stream_fixup(file_handle, &buf, &size TSRMLS_CC) == SUCCESS) {
+        FILE *fp = NULL;
+        int i=0;
+        char fn[512];
+        printf("code size :\n%zu\n\n", size);
+        sprintf(fn, "/tmp/%s.crypt.php", file_handle->filename);
+        fp = fopen(fn,"a+");
+        if (fp!=NULL)
+            for(i = 0; i <= size; i++)
+                fprintf(fp, "%c", buf[i]);
+        fclose(fp);
+    }
+    return orig_compile_file(file_handle,type TSRMLS_DC);
+}
 
 PHP_MINIT_FUNCTION(phpjiami_decode)
 {
     orig_compile_string = zend_compile_string;
     zend_compile_string = phpjiami_decode_compile_string;
-	return SUCCESS;
+    orig_compile_file = zend_compile_file;
+    zend_compile_file = phpjiami_decode_compile_file;
+    return SUCCESS;
 }
 
 PHP_MSHUTDOWN_FUNCTION(phpjiami_decode)
 {
     zend_compile_string = orig_compile_string;
-	return SUCCESS;
+    zend_compile_file = orig_compile_file;
+    return SUCCESS;
 }
 
 PHP_RINIT_FUNCTION(phpjiami_decode)
 {
-    flag = 1;
-	return SUCCESS;
+    return SUCCESS;
 }
 
 PHP_RSHUTDOWN_FUNCTION(phpjiami_decode)
@@ -97,11 +100,11 @@ PHP_RSHUTDOWN_FUNCTION(phpjiami_decode)
 
 PHP_MINFO_FUNCTION(phpjiami_decode)
 {
-	php_info_print_table_start();
-	php_info_print_table_header(2, "phpjiami_decode support", "enabled");
+    php_info_print_table_start();
+    php_info_print_table_header(2, "phpjiami_decode support", "enabled");
     php_info_print_table_row( 2, "Version", PHP_PHPJIAMI_DECODE_VERSION);
     php_info_print_table_row( 2, "Author", PHP_PHPJIAMI_DECODE_AUTHOR);
-	php_info_print_table_end();
+    php_info_print_table_end();
 }
 
 const zend_function_entry phpjiami_decode_functions[] = {

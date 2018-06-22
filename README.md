@@ -1,6 +1,10 @@
 # phpjiami_decode
 
-An ext for php to decode some phpjiami
+An extension for php to decode some phpjiami and extcrypt
+
+- [x] phpjiami
+- [x] extcrypt
+- [ ] OPCode
 
 ## Support version
 
@@ -25,6 +29,8 @@ An ext for php to decode some phpjiami
     echo "[phpjiami_decode]" >> /etc/php.ini
     echo "extension=phpjiami_decode.so" >> /etc/php.ini
 
+    最好是最优先加载，也就是放在ini最前面。。。(这个是经验，但是不能保证一定)
+
 ## Usage
 
     cd /path/to/your/web/
@@ -32,12 +38,12 @@ An ext for php to decode some phpjiami
 
 Then, when you request _http://localhost:8000/xxx.php_
 
-If `eval` in the `xxx.php` and it ran, the eval's parameter will save to `/path/for/your/dir/xxx.virink.php`.
+If `eval` in the `xxx.php` and it ran, the eval's parameter will save to `/path/for/your/dir/xxx.eval.php`.
 
 ### e.g:
 
     /var/www/html/index.php
-    /var/www/html/index.virink.php
+    /var/www/html/index.eval.php or /tmp/index.php.crypt.php
 
 ## LICENSE
 
